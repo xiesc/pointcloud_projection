@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(vslam)
+project(pointcloud_projection)
 #SET( CMAKE_CXX_COMPILER "g++") #设定编译器
 
 ## Compile as C++11, supported in ROS Kinetic and newer
@@ -14,18 +14,17 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   roscpp
   std_msgs
-image_transport
-cv_bridge)
+  image_transport
+  cv_bridge
+)
 
 # 增加PCL库的依赖
 FIND_PACKAGE( PCL REQUIRED COMPONENTS common io visualization filters)
 
 # 增加opencv的依赖
-FIND_PACKAGE( OpenCV 2.4 REQUIRED )
+FIND_PACKAGE( OpenCV REQUIRED )
 
-
-
-
+find_package(Eigen3 REQUIRED)
 
 ###################################
 ## catkin specific configuration ##
@@ -39,17 +38,8 @@ FIND_PACKAGE( OpenCV 2.4 REQUIRED )
 
 catkin_package(
   CATKIN_DEPENDS sensor_msgs roscpp std_msgs image_transport cv_bridge
-  DEPENDS PCL OpenCV
-  LIBRARIES SlamBase
+  DEPENDS PCL OpenCV Eigen
 )
-
-
-#catkin_package(
-  #INCLUDE_DIRS include
-  #LIBRARIES SlamBase
-  #CATKIN_DEPENDS ${${PROJECT_NAME}_CATKIN_DEPS}
-#  DEPENDS system_lib
-#)
 
 ###########
 ## Build ##
@@ -58,26 +48,31 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 
-INCLUDE_DIRECTORIES( ${PCL_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} include ${catkin_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(
+  ${PCL_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
+  ${catkin_INCLUDE_DIRS}
+  ${Eigen_INCLUDE_DIRS}
+) 
 
 ADD_DEFINITIONS( ${PCL_DEFINITIONS} )   
 
 
-ADD_LIBRARY(SlamBase src/SlamBase/SlamBase.cpp)
-TARGET_LINK_LIBRARIES( SlamBase
-    ${OpenCV_LIBS} 
-    ${PCL_LIBRARIES}
+# ADD_LIBRARY(SlamBase src/SlamBase/SlamBase.cpp)
+# TARGET_LINK_LIBRARIES( SlamBase
+#     ${OpenCV_LIBS} 
+#     ${PCL_LIBRARIES}
+# )
+# add_dependencies(SlamBase ${catkin_EXPORTED_TARGETS})
+
+ADD_EXECUTABLE(${PROJECT_NAME}_node src/main.cpp)
+target_link_libraries(${PROJECT_NAME}_node
+  ${OpenCV_LIBS} 
+  ${PCL_LIBRARIES}
+  ${Eigen_LIBRARIES}
+  ${catkin_LIBRARIES}
 )
-add_dependencies(SlamBase ${catkin_EXPORTED_TARGETS})
-
-
-ADD_EXECUTABLE(VSlam src/VSlam/VSlam.cpp)
-TARGET_LINK_LIBRARIES( VSlam
-    SlamBase
-${OpenCV_LIBS} 
-    ${PCL_LIBRARIES}
-${catkin_LIBRARIES})
-add_dependencies(VSlam ${catkin_EXPORTED_TARGETS})
+add_dependencies(${PROJECT_NAME}_node ${catkin_EXPORTED_TARGETS})
 
 #ADD_SUBDIRECTORY( ${PROJECT_SOURCE_DIR}/src/SlamBase)
 #ADD_SUBDIRECTORY( ${PROJECT_SOURCE_DIR}/src/VSlam)

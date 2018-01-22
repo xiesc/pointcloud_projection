@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>vslam</name>
+  <name>pointcloud_projection</name>
   <version>0.0.0</version>
-  <description>The vslam package</description>
+  <description>The package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
