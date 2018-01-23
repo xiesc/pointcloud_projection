@@ -32,6 +32,9 @@ bool saveImg = false;
 bool resultGet;
 const int stackImgSaving = 30;
 int stepImgSaving =0;
+Matrix<float, 3, 4> RTP;
+
+
 
 void
 generateColorMap(const int numColor)
@@ -136,10 +139,8 @@ void pointsCloudCallback(const PointCloud::ConstPtr& msg)
   homo << matrix.topRows(3), MatrixXf::Ones(1, matrix.cols());
   // std::cout << homo.rows() << "," << homo.cols() << std::endl;
 
-  Matrix<float, 3, 4> RTP;
-  RTP<<45,-8,83,21,
-       82,33,-38,-30,
-       0.05,0.05,0.03,0.01;
+
+
 
   MatrixXf uv = RTP * homo;
   // std::cout << uv.rows() << "," << uv.cols() << std::endl;
@@ -173,6 +174,10 @@ void pointsCloudCallback(const PointCloud::ConstPtr& msg)
 
 int main(int argc, char** argv)
 {
+
+ RTP<<45,-8,83,21,
+      82,33,-38,-30,
+      0.05,0.05,0.03,0.01;
 
   generateColorMap(layerNum);
   layerStep = 30.0/layerNum;
