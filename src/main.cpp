@@ -35,8 +35,13 @@ const int stackImgSaving = 30;
 int stepImgSaving =0;
 Matrix<float, 3, 4> RTP;
 
-const float uc = 989.6321;
-const float vc=612.3716;
+// const float uc = 989.6321;
+// const float vc=612.3716;
+
+const float uc = 320;
+const float vc=240;
+
+
 const float kf=-1.1819e-07;
 const float ks=4.9020e-14;
 const float pf=1.2344e-06;
@@ -173,7 +178,8 @@ void pointsCloudCallback(const PointCloud::ConstPtr& msg)
   {
       // std::cerr<<"c,"<<layerStep<<std::endl;
       // std::cerr<<"a,"<<matrix(2,i)<<std::endl;
-      if(matrix(1,i)<=0.5)
+      // matrix(1,i)<=0.5 ||
+      if( u[i]>revolutionU || u[i]<0 || v[i]>revolutionV || v[i]<0)
       {
         frontIndex[i]=false;
         continue;
@@ -204,7 +210,7 @@ void pointsCloudCallback(const PointCloud::ConstPtr& msg)
 int main(int argc, char** argv)
 {
 
- RTP<<-33.0284,53.5994,-4.5871,64.6590
+ RTP<<-33.0284,53.5994,-4.5871,64.6590,
       -26.4132,3.2876,-47.8291,-77.3831,
       -0.0433,0.0081,-0.0015,-0.0763;
 
