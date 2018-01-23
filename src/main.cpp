@@ -21,6 +21,7 @@ typedef pcl::PointCloud<pcl::PointXYZI> PointCloud;
 
 ros::Publisher pubImage;
 ArrayXf u,v;
+ArrayXf u_x,u_y,r_uv,u_x_,u_y_;
 
 float layerStep;
 const int layerNum = 50;
@@ -34,6 +35,14 @@ const int stackImgSaving = 30;
 int stepImgSaving =0;
 Matrix<float, 3, 4> RTP;
 
+const float uc = 989.6321;
+const float vc=612.3716;
+const float kf=-1.1819e-07;
+const float ks=4.9020e-14;
+const float pf=1.2344e-06;
+const float ps=-2.4287e-07;
+const float revolutionU = 640;
+const float revolutionV = 480;
 
 
 void
@@ -147,6 +156,19 @@ void pointsCloudCallback(const PointCloud::ConstPtr& msg)
   u = uv.row(0).array() / uv.row(2).array();
   v = uv.row(1).array() / uv.row(2).array();
 
+  u_x = u.array() - uc;
+  u_y = v.array() - vc;
+
+  r_uv = u_x.array() * u_x.array() + u_y.array() * u_y.array();
+
+  u_x_ = u_x.array()*(1+kf*r_uv+ks*r_uv.array()*r_uv.array()).array()
+        +(2*pf*u_x.array()*u_y.array()+ps*(r_uv+2*u_x.array()*u_x.array()));
+  u_y_ = u_y.array()*(1+kf*r_uv+ks*r_uv.array()*r_uv.array()).array()
+        +(2*ps*u_x.array()*u_y.array()+pf*(r_uv+2*u_y.array()*u_y.array()));
+
+  u  = u_x_ + uc;
+  v  = u_y_ + vc;
+
   for(int i = 0; i < u.size(); i++)
   {
       // std::cerr<<"c,"<<layerStep<<std::endl;
@@ -154,10 +176,17 @@ void pointsCloudCallback(const PointCloud::ConstPtr& msg)
       if(matrix(1,i)<=0.5)
       {
         frontIndex[i]=false;
+        continue;
       }
       else{
         frontIndex[i]=true;
       }
+     
+
+      
+
+
+
 
       float range = matrix(1,i)/layerStep;
       colorIndex[i] = floor(range);
@@ -175,9 +204,9 @@ void pointsCloudCallback(const PointCloud::ConstPtr& msg)
 int main(int argc, char** argv)
 {
 
- RTP<<45,-8,83,21,
-      82,33,-38,-30,
-      0.05,0.05,0.03,0.01;
+ RTP<<-33.0284,53.5994,-4.5871,64.6590
+      -26.4132,3.2876,-47.8291,-77.3831,
+      -0.0433,0.0081,-0.0015,-0.0763;
 
   generateColorMap(layerNum);
   layerStep = 30.0/layerNum;
